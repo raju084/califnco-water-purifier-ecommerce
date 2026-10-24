@@ -71,7 +71,7 @@ interface AppContextType {
   selectedProductForZoom: Product | null;
   setSelectedProductForZoom: (product: Product | null) => void;
   userAddress: Address;
-  setUserAddress: (addr: Address) => void;
+  setUserAddress: (addr: Address | ((prev: Address) => Address)) => void;
   selectedCategory: string;
   setSelectedCategory: (cat: string) => void;
 }
@@ -111,13 +111,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return DEFAULT_ADDRESS;
   });
 
-  const setUserAddress = (addr: Address) => {
-    setUserAddressState(addr);
-    try {
-      localStorage.setItem('califnco_user_address', JSON.stringify(addr));
-    } catch (e) {
-      console.warn(e);
-    }
+  const setUserAddress = (addrOrUpdater: Address | ((prev: Address) => Address)) => {
+    setUserAddressState(prev => {
+      const next = typeof addrOrUpdater === 'function' ? addrOrUpdater(prev) : addrOrUpdater;
+      try {
+        localStorage.setItem('califnco_user_address', JSON.stringify(next));
+      } catch (e) {
+        console.warn(e);
+      }
+      return next;
+    });
   };
 
   // Sync dark mode class
