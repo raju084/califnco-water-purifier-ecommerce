@@ -101,7 +101,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [rewardPoints, setRewardPoints] = useState<number>(350);
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
   const [selectedProductForZoom, setSelectedProductForZoom] = useState<Product | null>(null);
-  const [userAddress, setUserAddress] = useState<Address>(DEFAULT_ADDRESS);
+  const [userAddress, setUserAddressState] = useState<Address>(() => {
+    try {
+      const saved = localStorage.getItem('califnco_user_address');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn(e);
+    }
+    return DEFAULT_ADDRESS;
+  });
+
+  const setUserAddress = (addr: Address) => {
+    setUserAddressState(addr);
+    try {
+      localStorage.setItem('califnco_user_address', JSON.stringify(addr));
+    } catch (e) {
+      console.warn(e);
+    }
+  };
 
   // Sync dark mode class
   useEffect(() => {

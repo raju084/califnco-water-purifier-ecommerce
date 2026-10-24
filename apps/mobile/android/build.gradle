@@ -18,6 +18,7 @@ buildscript {
 apply from: "variables.gradle"
 
 allprojects {
+    buildDir = "C:/tmp/califnco-build/${project.name}"
     repositories {
         google()
         mavenCentral()

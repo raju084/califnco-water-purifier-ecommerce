@@ -63,6 +63,17 @@ export const AddressMapModal: React.FC<AddressMapModalProps> = ({ isOpen, onClos
 
         mapInstanceRef.current = map;
         markerRef.current = marker;
+
+        setTimeout(() => {
+          if (mapInstanceRef.current) {
+            mapInstanceRef.current.invalidateSize();
+          }
+        }, 150);
+        setTimeout(() => {
+          if (mapInstanceRef.current) {
+            mapInstanceRef.current.invalidateSize();
+          }
+        }, 450);
       }
     }, 200);
 
@@ -105,14 +116,19 @@ export const AddressMapModal: React.FC<AddressMapModalProps> = ({ isOpen, onClos
           if (mapInstanceRef.current && markerRef.current) {
             mapInstanceRef.current.setView([latitude, longitude], 15);
             markerRef.current.setLatLng([latitude, longitude]);
+            mapInstanceRef.current.invalidateSize();
           }
           reverseGeocode(latitude, longitude);
           setIsDetecting(false);
         },
-        () => {
+        err => {
+          console.warn('Geolocation error or permission denied:', err);
+          if (mapInstanceRef.current && markerRef.current) {
+            mapInstanceRef.current.invalidateSize();
+          }
           setIsDetecting(false);
         },
-        { timeout: 8000 }
+        { timeout: 10000, enableHighAccuracy: true }
       );
     } else {
       setIsDetecting(false);
