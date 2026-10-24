@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  waha:
+    image: devlikeapro/waha:latest
+    container_name: califnco-waha
+    restart: always
+    ports:
+      - "3008:3000"
+    environment:
+      - WAHA_LOG_FORMAT=JSON
+      - WAHA_ZIP_PATH=/tmp/waha
+      - WHATSAPP_DEFAULT_ENGINE=NOWEB
+    volumes:
+      - ./waha-sessions:/tmp/waha
+
+# Usage Instructions:
+# 1. Run: docker compose up -d
+# 2. Open: http://localhost:3008/dashboard in your browser
+# 3. Scan QR code using WhatsApp on your phone (Linked Devices)
+# 4. Run: npm run post-now to automatically publish daily product to WhatsApp Status!

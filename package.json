@@ -1,0 +1,17 @@
+{
+  "name": "califnco-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix apps/mobile",
+    "dev:admin": "npm run dev --prefix apps/admin",
+    "dev:mobile": "npm run dev --prefix apps/mobile",
+    "build": "npm run build:mobile && npm run build:admin",
+    "build:admin": "npm run build --prefix apps/admin",
+    "build:mobile": "npm run build --prefix apps/mobile",
+    "preview:mobile": "npm run preview --prefix apps/mobile",
+    "start:admin": "npm run start --prefix apps/admin",
+    "automation:post": "node automation/daily-scheduler.js --now",
+    "automation:start": "node automation/daily-scheduler.js"
+  }
+}
