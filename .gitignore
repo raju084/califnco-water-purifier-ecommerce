@@ -8,6 +8,11 @@ dist/
 build/
 .next/
 out/
+*.apk
+.gradle/
+apps/mobile/android/app/build/
+apps/mobile/android/build/
+apps/mobile/android/local.properties
 
 # Environment Variables
 .env
