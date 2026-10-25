@@ -7,14 +7,14 @@ dotenv.config();
  * Uses Hugging Face / Pollinations AI (100% free, zero cost, no credit card)
  */
 export async function generateProductImage(product) {
-  console.log(`🎨 [AI Image Engine] Generating realistic photorealistic image for: ${product.name}...`);
+  console.log(`🎨 [AI Image Engine] Generating realistic photorealistic RO water purifier image for: ${product.name}...`);
 
   const prompt = encodeURIComponent(
-    `Ultra-realistic 8k commercial product photography of ${product.name}, sleek modern water purifier, mounted on luxury minimalist marble kitchen wall, crystal glass being filled with pure crystal clear water, warm morning sunlight, blue LED ambient indicator glow, architectural digest photography, shot on Hasselblad 85mm f/1.4 lens`
+    `Ultra-realistic 8k commercial photography of modern sleek Califnco RO water purifier appliance mounted on luxury minimalist marble kitchen wall, pouring crystal clear pure mineral water into glass, blue LED ambient indicator glow, premium water filtration system, cinematic lighting, sharp focus`
   );
 
-  // Pollinations.ai generates instant high-resolution AI images for free with high uptime
-  const aiImageUrl = `https://image.pollinations.ai/prompt/${prompt}?width=1080&height=1080&nologo=true&seed=${Math.floor(Math.random() * 100000)}`;
+  // Pollinations.ai generates instant high-resolution AI images with .jpg extension for Instagram compatibility
+  const aiImageUrl = `https://image.pollinations.ai/prompt/${prompt}.jpg?width=1080&height=1080&nologo=true&seed=${Math.floor(Math.random() * 100000)}`;
 
   console.log(`✓ [AI Image Engine] AI Image Generated Successfully:`);
   console.log(`   🔗 ${aiImageUrl}`);

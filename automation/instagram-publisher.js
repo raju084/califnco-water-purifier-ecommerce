@@ -54,10 +54,18 @@ export async function postToInstagram({ imageUrl, caption, product }) {
         }
       }
 
-      // Instagram Graph API requires public JPEG image URL with supported content type
+      // Instagram Graph API requires a valid public JPEG image URL
       let postImageUrl = imageUrl;
-      if (!postImageUrl || !postImageUrl.includes('.jpeg') && !postImageUrl.includes('.jpg')) {
-        postImageUrl = 'https://images.pexels.com/photos/1458694/pexels-photo-1458694.jpeg?auto=compress&cs=tinysrgb&w=1080';
+      const isValidImage = postImageUrl && (
+        postImageUrl.includes('.jpeg') ||
+        postImageUrl.includes('.jpg') ||
+        postImageUrl.includes('pollinations.ai') ||
+        postImageUrl.includes('images.unsplash.com')
+      );
+
+      if (!isValidImage) {
+        // High quality RO water purifier / clean mineral water dispenser fallback (never vegetables)
+        postImageUrl = 'https://images.pexels.com/photos/327090/pexels-photo-327090.jpeg?auto=compress&cs=tinysrgb&w=1080';
       }
 
       // Defensive check: Ensure caption strictly conforms to Instagram's 2,200 character limit
