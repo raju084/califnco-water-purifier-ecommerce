@@ -31,17 +31,14 @@ export async function generateProductCaption(product) {
   const geminiApiKey = process.env.GEMINI_API_KEY;
 
   if (geminiApiKey && geminiApiKey !== 'your_gemini_api_key_here') {
-    try {
-      const genAI = new GoogleGenerativeAI(geminiApiKey);
-      // Use current Gemini model
-      let model;
-      try {
-        model = genAI.getGenerativeModel({ model: 'gemini-3.8-flash' });
-      } catch (e) {
-        model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-      }
+    const candidateModels = [
+      process.env.GEMINI_MODEL,
+      'gemini-2.5-flash',
+      'gemini-3.8-flash',
+      'gemini-2.5-pro'
+    ].filter(Boolean);
 
-      const prompt = `You are a social media growth copywriter for Califnco Water Purifiers.
+    const prompt = `You are a social media growth copywriter for Califnco Water Purifiers.
 Write an engaging, high-converting Instagram post for our product:
 Product Name: ${product.name}
 Category: ${product.category}
@@ -58,13 +55,36 @@ Format the caption with:
 5. 15-20 trending hashtags on water purification and health.
 Keep it punchy, professional, and aesthetic.`;
 
-      const result = await model.generateContent(prompt);
-      const text = result.response.text();
-      console.log(`✓ [AI Caption Engine] Generated via Gemini AI API.`);
-      return text;
+    try {
+      const genAI = new GoogleGenerativeAI(geminiApiKey);
+
+      for (const modelName of candidateModels) {
+        try {
+          const model = genAI.getGenerativeModel({ model: modelName });
+          const result = await model.generateContent(prompt);
+          const text = result.response.text();
+          console.log(`✓ [AI Caption Engine] Generated via Gemini AI API (${modelName}).`);
+          return text;
+        } catch (err) {
+          const errMsg = err.message || '';
+          if (
+            errMsg.includes('API_KEY_INVALID') ||
+            errMsg.includes('API key not valid') ||
+            errMsg.includes('denied access') ||
+            errMsg.includes('403 Forbidden')
+          ) {
+            console.warn(`⚠️ [AI Caption Engine] Gemini API access denied with current GEMINI_API_KEY (${errMsg.split('\n')[0]}).`);
+            console.warn(`ℹ️ [AI Caption Engine] To enable live AI generation, create a free API key at https://aistudio.google.com/app/apikey (keys start with "AIzaSy...") and paste it into automation/.env`);
+            break;
+          }
+          console.warn(`⚠️ [AI Caption Engine] Model "${modelName}" call failed (${errMsg.split('\n')[0]}). Trying fallback...`);
+        }
+      }
     } catch (err) {
-      console.warn(`⚠️ [AI Caption Engine] Gemini API call had an issue (${err.message}). Using smart fallback synthesizer.`);
+      console.warn(`⚠️ [AI Caption Engine] Gemini initialization error: ${err.message}`);
     }
+
+    console.warn(`⚠️ [AI Caption Engine] Using smart fallback synthesizer.`);
   }
 
   // High-converting intelligent fallback copy synthesizer
