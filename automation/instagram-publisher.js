@@ -60,13 +60,22 @@ export async function postToInstagram({ imageUrl, caption, product }) {
         postImageUrl = 'https://images.pexels.com/photos/1458694/pexels-photo-1458694.jpeg?auto=compress&cs=tinysrgb&w=1080';
       }
 
+      // Defensive check: Ensure caption strictly conforms to Instagram's 2,200 character limit
+      let safeCaption = (caption || '').trim();
+      if (safeCaption.length > 2100) {
+        console.warn(`   ⚠️ Caption was ${safeCaption.length} characters. Trimming to under 2,100 for Instagram API compliance...`);
+        const cutoff = safeCaption.slice(0, 2050);
+        const lastSpace = cutoff.lastIndexOf(' ');
+        safeCaption = (lastSpace > 1600 ? cutoff.slice(0, lastSpace) : cutoff) + '\n\n#Califnco';
+      }
+
       // Step 1: Create Container
       console.log(`   Step 1: Creating media container on ${isInstagramDirect ? 'Instagram Graph API' : 'Meta Graph API'}...`);
       const containerRes = await axios.post(
         `${apiBase}/${targetAccountId}/media`,
         {
           image_url: postImageUrl,
-          caption: caption,
+          caption: safeCaption,
           access_token: accessToken
         }
       );

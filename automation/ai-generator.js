@@ -23,6 +23,28 @@ export async function generateProductImage(product) {
 }
 
 /**
+ * Clean up markdown headers, image descriptions, and enforce Instagram's 2,200 character limit
+ */
+function cleanInstagramCaption(rawText) {
+  let text = (rawText || '').trim();
+  // Remove markdown intro like "Here's an engaging..."
+  text = text.replace(/^(?:Here's|Here is|Sure,|Certainly|Below is)[\s\S]*?(?:\n\n|---)/i, '');
+  // Remove image/video prompts like "(Image/Video: ...)" or "**(Image: ...)**"
+  text = text.replace(/\*{0,2}\(?Image\/Video:[\s\S]*?\)?\*{0,2}/gi, '');
+  text = text.replace(/\*{0,2}\(?Image:[\s\S]*?\)?\*{0,2}/gi, '');
+  text = text.replace(/^---+\s*/gm, '');
+  text = text.trim();
+
+  // Instagram strict limit is 2,200 characters. Keep it under 2,000 for safety.
+  if (text.length > 2000) {
+    const cutoff = text.slice(0, 1950);
+    const lastSpace = cutoff.lastIndexOf(' ');
+    text = (lastSpace > 1600 ? cutoff.slice(0, lastSpace) : cutoff) + '\n\n#Califnco';
+  }
+  return text;
+}
+
+/**
  * Generate high-converting AI caption and hashtags using Google Gemini API
  */
 export async function generateProductCaption(product) {
@@ -38,8 +60,8 @@ export async function generateProductCaption(product) {
       'gemini-2.5-pro'
     ].filter(Boolean);
 
-    const prompt = `You are a social media growth copywriter for Califnco Water Purifiers.
-Write an engaging, high-converting Instagram post for our product:
+    const prompt = `You are a social media copywriter for Califnco Water Purifiers.
+Write a punchy, high-converting Instagram caption for:
 Product Name: ${product.name}
 Category: ${product.category}
 Key Features: ${product.features.join(', ')}
@@ -47,13 +69,18 @@ Specs: ${JSON.stringify(product.specs)}
 Price: ₹${product.retailPrice} (Dealer wholesale price: ₹${product.wholesalePrice})
 Special Offer: Use code PUREWATER500 for flat ₹500 off!
 
-Format the caption with:
-1. An irresistible hook question or health insight
-2. Why 100% pure mineral water matters for Indian households
-3. Key technical benefits (bullet points with emojis)
-4. Call to action directing to the Califnco Mobile App
-5. 15-20 trending hashtags on water purification and health.
-Keep it punchy, professional, and aesthetic.`;
+Format requirements:
+1. Direct opening hook or health insight
+2. Why mineral-rich water matters for Indian families
+3. 4-5 key technical bullet points with emojis
+4. Clear Call to Action to download Califnco App
+5. 10-15 relevant hashtags
+
+CRITICAL RULES:
+- Output ONLY the ready-to-post caption.
+- Do NOT include any intro like "Here is your post" or "Sure!".
+- Do NOT include image descriptions like "(Image: ...)" or markdown horizontal dividers (---).
+- Maximum total length must be UNDER 1,400 characters (Instagram limit is 2,200).`;
 
     try {
       const genAI = new GoogleGenerativeAI(geminiApiKey);
@@ -62,8 +89,11 @@ Keep it punchy, professional, and aesthetic.`;
         try {
           const model = genAI.getGenerativeModel({ model: modelName });
           const result = await model.generateContent(prompt);
-          const text = result.response.text();
-          console.log(`✓ [AI Caption Engine] Generated via Gemini AI API (${modelName}).`);
+          let text = result.response.text();
+          
+          // Clean any conversational filler or image descriptions from AI response
+          text = cleanInstagramCaption(text);
+          console.log(`✓ [AI Caption Engine] Generated via Gemini AI API (${modelName}, ${text.length} chars).`);
           return text;
         } catch (err) {
           const errMsg = err.message || '';
